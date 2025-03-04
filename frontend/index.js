@@ -1,80 +1,91 @@
-// 👉 TASK 1 - Understand the existing code 👈
 function moduleProject2() {
-  // 👇 WORK WORK BELOW THIS LINE 👇
-  let startTime = new Date().getTime() // Record start time
-
-  function getTimeElapsed() { // To be used at end of game to get elapsed time
-    let currentTime = new Date().getTime()
-    return currentTime - startTime
+  let startTime = null;
+  let timer = null;
+  let timeElapsed = 0;
+  
+  function startTimer() {
+    if (!timer) {
+      startTime = new Date().getTime();
+      timer = setInterval(() => {
+        timeElapsed = Math.floor((new Date().getTime() - startTime) / 1000);
+      }, 1000);
+    }
   }
-
-  // Setting up the footer content
-  let footer = document.querySelector('footer')
-  let currentYear = new Date().getFullYear()
-  footer.textContent = `© BLOOM INSTITUTE OF TECHNOLOGY ${currentYear}`
-
-  let keys = { // To easily check `event.key` on keyboard events
+  
+  function stopTimer() {
+    clearInterval(timer);
+    timer = null;
+  }
+  
+  function displayTimeElapsed() {
+    let header = document.querySelector('#game-header');
+    header.textContent = `Time Elapsed: ${timeElapsed} seconds`;
+  }
+  
+  let keys = {
     space: ' ',
     up: 'ArrowUp',
     right: 'ArrowRight',
     down: 'ArrowDown',
     left: 'ArrowLeft',
-  }
-
-  // Helper function to grab all squares
-  const getAllSquares = () => document.querySelectorAll('.square')
-
-  // Populating the grid with rows and squares
+  };
+  
+  const getAllSquares = () => document.querySelectorAll('.square');
+  
   for (let n = 0; n < 5; n++) {
-    // Creating the rows
-    let row = document.createElement('div')
-    document.querySelector('#grid').appendChild(row)
-    row.classList.add('row')
-    // Creating the squares
+    let row = document.createElement('div');
+    document.querySelector('#grid').appendChild(row);
+    row.classList.add('row');
+    
     for (let m = 0; m < 5; m++) {
-      let square = document.createElement('div')
-      square.classList.add('square')
-      row.appendChild(square)
+      let square = document.createElement('div');
+      square.classList.add('square');
+      row.appendChild(square);
       square.addEventListener('click', () => {
-        // 👉 TASK 2 - Use a click handler to target a square 👈
-      })
+        startTimer();
+        square.classList.add("targeted");
+      });
     }
   }
-  document.querySelector('.row:nth-child(3)')
-    .children[2].classList.add('targeted') // Initial square being targeted
-
-  // Helper function to obtain 5 random indices (0-24) to put mosquitoes in
-  function generateRandomIntegers() {
-    let randomInts = []
-    while (randomInts.length < 5) {
-      let randomInt = Math.floor(Math.random() * 25)
-      if (!randomInts.includes(randomInt)) {
-        randomInts.push(randomInt)
+  
+  document.querySelector('.row:nth-child(3)').children[2].classList.add('targeted');
+  
+  document.addEventListener('keydown', evt => {
+    startTimer();
+    let currentSquare = document.querySelector('.targeted');
+    if (!currentSquare) return;
+    
+    if (evt.key === keys.right && currentSquare.nextElementSibling) {
+      currentSquare.classList.remove('targeted');
+      currentSquare.nextElementSibling.classList.add('targeted');
+    }
+    if (evt.key === keys.left && currentSquare.previousElementSibling) {
+      currentSquare.classList.remove('targeted');
+      currentSquare.previousElementSibling.classList.add('targeted');
+    }
+    if (evt.key === keys.down) {
+      const rowBelow = currentSquare.parentElement.nextElementSibling;
+      if (rowBelow) {
+        const columnIndex = [...currentSquare.parentElement.children].indexOf(currentSquare);
+        currentSquare.classList.remove('targeted');
+        rowBelow.children[columnIndex].classList.add('targeted');
       }
     }
-    return randomInts
+    if (evt.key === keys.up) {
+      const rowAbove = currentSquare.parentElement.previousElementSibling;
+      if (rowAbove) {
+        const columnIndex = [...currentSquare.parentElement.children].indexOf(currentSquare);
+        currentSquare.classList.remove('targeted');
+        rowAbove.children[columnIndex].classList.add('targeted');
+      }
+    }
+  });
+  
+  function endGame() {
+    stopTimer();
+    displayTimeElapsed();
   }
-  let allSquares = getAllSquares()
-  generateRandomIntegers().forEach(randomInt => { // Puts live mosquitoes in 5 random squares
-    let mosquito = document.createElement('img')
-    mosquito.src = './mosquito.png'
-    mosquito.style.transform = `rotate(${Math.floor(Math.random() * 359)}deg) scale(${Math.random() * 0.4 + 0.8})`
-    mosquito.dataset.status = 'alive'
-    allSquares[randomInt].appendChild(mosquito)
-  })
+} 
 
-  document.addEventListener('keydown', evt => {
-    // 👉 TASK 3 - Use the arrow keys to highlight a new square 👈
-
-    // 👉 TASK 4 - Use the space bar to exterminate a mosquito 👈
-
-    // 👉 TASK 5 - End the game 👈
-  })
-  // 👆 WORK WORK ABOVE THIS LINE 👆
-}
-
-// ❗ DO NOT MODIFY THE CODE BELOW
-// ❗ DO NOT MODIFY THE CODE BELOW
-// ❗ DO NOT MODIFY THE CODE BELOW
 if (typeof module !== 'undefined' && module.exports) module.exports = { moduleProject2 }
-else moduleProject2()
+else moduleProject2();
